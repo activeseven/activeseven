@@ -1,15 +1,19 @@
 {
-  "name": "$vendor_name$/$package_name$",
-  "description": "$description$",
-  "minimum-stability": "$stability$",
-  "license": "$license$",
+  "name": "activeseven/activeseven",
+  "description": "A collection of stuff that I find to be occasionally useful.",
+  "minimum-stability": "stable",
+  "license": "proprietary",
   "authors": [
     {
-      "name": "$author$",
-      "email": "$email$"
+      "name": "activeseven",
+      "email": "activeseven@gmail.com"
     }
   ],
+  "autoload": {
+    "psr-4": {
+      "activeseven\\activeseven\\": "src/"
+    }
+  },
   "require": {
-    $END$
   }
 }
