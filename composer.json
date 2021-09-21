@@ -15,5 +15,8 @@
     }
   },
   "require": {
+  },
+  "require-dev": {
+    "phpunir/phpunit": "~9.5"
   }
 }
