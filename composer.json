@@ -17,6 +17,6 @@
   "require": {
   },
   "require-dev": {
-    "phpunir/phpunit": "~9.5"
+    "phpunit/phpunit": "~9.5"
   }
 }
