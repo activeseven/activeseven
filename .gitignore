@@ -1,6 +1,7 @@
 # Project stuff
 # -----------------------------------------------------------------------------
 .idea
+.phpunit.result.cache
 vendor/
 
 # Stuff the OS can leave around
