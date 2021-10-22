@@ -4,32 +4,89 @@ use PHPUnit\Framework\TestCase;
 
 class ActiveStringTest extends TestCase
 {
-    public function test_play()
-    {
-        $this->assertTrue(true);
+    /**
+     * String being used for most of the tests here.
+     * @var string
+     */
+    protected const TEST_STRING = 'iamtheverymodelofamodernmajorgeneraliveinformation';
+
+    /**
+     * @TODO write something here
+     * @var string
+     */
+    protected const FUNCTION_TO_UPPER = 'toUppercase';
+
+    // Position Test templates
+    public function template_given_function_with_from(
+        string  $function,
+        string  $test_string,
+        int     $from_value
+    ) : string {
+        $active_string = new \activeseven\ActiveString($test_string);
+        return $active_string->$function()->fromThisCharacterPosition($from_value)->get();
     }
 
-    public function test_class_returns_the_string_it_was_set_to()
+    public function template_given_function_with_to(
+        string  $function,
+        string  $test_string,
+        int     $to_value
+    ) : string {
+        $active_string = new \activeseven\ActiveString($test_string);
+        return $active_string->$function()->toThisCharacterPosition($to_value)->get();
+    }
+
+    public function template_given_function_with_length(
+        string  $function,
+        string  $test_string,
+        int     $char_length
+    ) : string {
+        $active_string = new \activeseven\ActiveString($test_string);
+        return $active_string->$function()->forThisManyCharacters($char_length)->get();
+    }
+
+    public function template_given_function_with_from_and_length(
+        string  $function,
+        string  $test_string,
+        int     $from_value,
+        int     $length_value
+    ) : string {
+        $active_string = new \activeseven\ActiveString($test_string);
+        return $active_string->$function()
+            ->fromThisCharacterPosition($from_value)
+            ->forThisManyCharacters($length_value)->get();
+    }
+
+    public function template_given_function_with_from_and_to(
+        string  $function,
+        string  $test_string,
+        int     $from_value,
+        int     $to_value
+    ) : string {
+        $active_string = new \activeseven\ActiveString($test_string);
+        return $active_string->$function()
+            ->fromThisCharacterPosition($from_value)
+            ->toThisCharacterPosition($to_value)->get();
+    }
+
+    // GENERAL TESTS
+    public function test_activestring_returns_the_string_it_was_set_to()
     {
         $test_string    = 'Just s0m3 s!lly $tring.';
         $active_string  = new \activeseven\ActiveString( $test_string );
 
         $this->assertEquals($test_string,$active_string);
     }
-
-    public function test_class_returns_empty_string_when_not_set()
+    public function test_activestring_returns_empty_string_when_not_set()
     {
         $active_string = new \activeseven\ActiveString();
         $this->assertEquals('',$active_string);
     }
-
-    public function test_class_count_returns_one_when_no_string_set()
+    public function test_activestring_count_returns_one_when_no_string_set()
     {
         $active_string = new \activeseven\ActiveString();
         $this->assertEquals(1,$active_string->getSizeOfStringHistory());
     }
-
-    public function test_class_returns_all_uppercase()
+    public function test_activestring_returns_all_uppercase()
     {
         $test_string    = 'this is an all lowercase string.';
         $active_string  = new \activeseven\ActiveString($test_string);
@@ -39,677 +96,843 @@ class ActiveStringTest extends TestCase
 
         $this->assertEquals($expected,$received);
     }
-
-    public function test_class_returns_sub_string()
+    public function test_activestring_returns_sub_string()
     {
         $test_string    = "I am the very model of a modern major general.";
         $active_string  = new \activeseven\ActiveString($test_string);
 
-        $expected       = substr($test_string,0,45);
-        $received       = $active_string->from(0)->to(45)->get();
+        $expected       = substr($test_string,0,46);
+        $received       = $active_string->from(0)->to(46)->get();
         $this->assertEquals($expected,$received);
 
         $expected       = substr($test_string,14,5);
         $received       = $active_string->from(14)->forLength(5)->get();
         $this->assertEquals($expected,$received);
-
     }
-
-    // UPPERCASE Tests
-    public function test_class_returns_uppercase_with_from()
+    public function test_activestring_returns_length()
     {
-        $test_string    = 'This is a string to capitalize for this test.';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'This is a string to CAPITALIZE FOR THIS TEST.';
-        $received       = $active_string->toUppercase()->from(20)->get();
-        $this->assertEquals($expected,$received);
+        $active_string = new activeseven\ActiveString(ActiveStringTest::TEST_STRING);
+        $this->assertEquals( strlen(ActiveStringTest::TEST_STRING),$active_string->length());
     }
-    public function test_class_returns_uppercase_with_from_min_value()
+    public function test_activestring_returns_correct_string_when_undone()
     {
-        $test_string    = 'this is a string to capitalize for this silly test';;
-        $active_string  = new \activeseven\ActiveString($test_string);
+        $original_string    = 'This is a test string';
+        $active_string      = new \activeseven\ActiveString($original_string);
 
-        $expected       = 'THIS IS A STRING TO CAPITALIZE FOR THIS SILLY TEST';;
-        $received       = $active_string->toUppercase()->from(0)->get();
+        $modified_string    = strtoupper($original_string);
+        $received           = $active_string->toUppercase()->get();
+        $this->assertEquals($modified_string,$received);
 
-        $this->assertEquals($expected,$received);
+        $undone_string      = $active_string->undo()->get();
+        $this->assertEquals($original_string,$undone_string);
     }
-    public function test_class_returns_uppercase_with_from_max_value()
+    public function test_activestring_cannot_undo_original_string()
     {
-        $test_string    = 'This is a string to capitalize for this test';
+        $test_string    = 'This is a test string';
         $active_string  = new \activeseven\ActiveString($test_string);
 
-        $expected       = 'This is a string to capitalize for this test';
-        $received       = $active_string->toUppercase()->from(44)->get();
-
-        $this->assertEquals($expected,$received);
+        $active_string->undo();
+        $this->assertEquals($test_string,$active_string);
     }
-    public function test_class_returns_uppercase_with_from_overloaded()
+
+    // VALIDATOR TESTS
+    public function test_activestring_can_validate_url()
     {
-        $test_string    = 'This is a string to capitalize for this test.';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'This is a string to CAPITALIZE FOR THIS TEST.';
-        $received       = $active_string->toUppercase()->from(65)->get();
-        $this->assertEquals($expected,$received);
-
-        $received       = $active_string->toUppercase()->from(110)->get();
-        $this->assertEquals($expected,$received);
+        $test_string    = 'https://www.somedomain.com';
+        $active_string   = new \activeseven\ActiveString($test_string);
+        $this->assertTrue(
+            $active_string->isUrl(),
+            "ActiveString::isUrl thinks {$test_string} is NOT a valid URL."
+        );
     }
-
-    public function test_class_returns_uppercase_with_negative_from()
+    public function test_activestring_can_validate_domain()
     {
-        $test_string    = 'This is a string to capitalize for this test.';
-        $active_string  = new \activeseven\ActiveString($test_string);
+        $is_domain_string   = 'www.activeseven.com'; // Gonna put a site here one day LOL
 
-        $expected       = 'This is a string to CAPITALIZE FOR THIS TEST.';
-        $received       = $active_string->toUppercase()->from(-25)->get();
-        $this->assertEquals($expected,$received);
+        $active_string = new \activeseven\ActiveString($is_domain_string);
+        $this->assertTrue(
+            $active_string->isDomain(),
+            "ActiveString::isDomain() thinks {$is_domain_string} us not a valid domain."
+        );
     }
-    public function test_class_returns_uppercase_with_negative_from_min_value()
+    public function test_activestring_can_validate_email()
     {
-        $test_string    = 'This is a string to capitalize for this silly test';
+        $test_string    = 'someone@somehwere.com';
         $active_string  = new \activeseven\ActiveString($test_string);
 
-        $expected       = 'This is a string to capitalize for this silly tesT';
-        $received       = $active_string->toUppercase()->from(-1)->get();
-        $this->assertEquals($expected,$received);
+        $this->assertTrue(
+            $active_string->isEmail(),
+            "ActiveString::isEmail() thinks {$test_string} is NOT a valid email."
+        );
     }
-    public function test_class_returns_uppercase_with_negative_from_max_value()
+    public function test_activestring_can_validate_ipv6()
     {
-        $test_string    = 'this is a string to capitalize for this silly test';
+        $test_string    = '2001:db8:3333:4444:5555:6666:7777:8888';
         $active_string  = new \activeseven\ActiveString($test_string);
 
-        $expected       = 'THIS IS A STRING TO CAPITALIZE FOR THIS SILLY TEST';
-        $received       = $active_string->toUppercase()->from(-50)->get();
-        $this->assertEquals($expected,$received);
+        $this->assertTrue(
+            $active_string->isIpv6(),
+            "ActiveString::isIpv6() thinks {$test_string} is NOT a valid IPv6 address."
+        );
     }
-    public function test_class_returns_uppercase_with_negative_from_overloaded()
+    public function test_activestring_can_validate_ipv4()
     {
-        $test_string    = 'This is a string to capitalize for this test.';
+        $test_string    = '192.0.2.146';
         $active_string  = new \activeseven\ActiveString($test_string);
 
-        $expected       = 'This is a string to CAPITALIZE FOR THIS TEST.';
-        $received       = $active_string->toUppercase()->from(-70)->get();
-        $this->assertEquals($expected,$received);
-
-        $received       = $active_string->toUppercase()->from(-115)->get();
-        $this->assertEquals($expected,$received);
+        $this->assertTrue(
+            $active_string->isIpv4(),
+            "ActiveString::isIpv4() thinks {$test_string} is NOT a valid IPv4 address."
+        );
     }
-
-    public function test_class_returns_uppercase_with_to()
+    public function test_activestring_can_validate_ip()
     {
-        $test_string    = 'This is a string to capitalize for this test.';
-        $active_string  = new \activeseven\ActiveString($test_string);
+        $ipv4_string    = '192.0.2.199';
+        $ipv6_string    = '2001:db8:8888:4444:5555:6666:7777:3333';
 
-        $expected       = 'THIS IS A STRING TO CAPITALIZE for this test.';
-        $received       = $active_string->toUppercase()->to(30)->get();
-        $this->assertEquals($expected,$received);
+        $ipv4   = new \activeseven\ActiveString($ipv4_string);
+        $ipv6   = new \activeseven\ActiveString($ipv6_string);
+
+        $this->assertTrue(
+            $ipv4->isIp(),
+            "ActiveString::isIp() thinks {$ipv4} is NOT a valid IP address."
+        );
+        $this->assertTrue(
+            $ipv6->isIp(),
+            "ActiveString::isIp() thinks {$ipv6} is NOT a valid IP address."
+        );
     }
-    public function test_class_returns_uppercase_with_to_min_value()
+    public function test_activestring_can_validate_mac()
     {
-        $test_string    = 'This is a string to capitalize for this cool test.';
-        $active_string  = new \activeseven\ActiveString($test_string);
+        $mac_string     = '00:1B:44:11:3A:B7';
 
-        $expected       = 'This is a string to capitalize for this cool test.';
-        $received       = $active_string->toUppercase()->to(0)->get();
-
-        $this->assertEquals($expected,$received);
+        $active_string  = new \activeseven\ActiveString($mac_string);
+        $this->assertTrue(
+            $active_string->isMac(),
+            "ActiveString::isMac() thinks {$mac_string} is NOT a valid mac address."
+        );
     }
-    public function test_class_returns_uppercase_with_to_max_value()
+
+    // UPPERCASE TESTS
+    public function test_activestring_returns_uppercase_with_from()
     {
-        $test_string    = 'This is a string to capitalize for this cool test.';
-        $active_string  = new \activeseven\ActiveString($test_string);
+        $expected_result    = 'iamtheverymodelofamoDERNMAJORGENERALIVEINFORMATION';
+        $received_result    = $this->template_given_function_with_from(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            20
+        );
 
-        $expected       = 'This is a string to capitalize for this cool test.';
-        $received       = $active_string->toUppercase()->to(50)->get();
-
-        $this->assertEquals($expected,$received);
+        $this->assertEquals($expected_result, $received_result);
     }
-    public function test_class_returns_uppercase_with_to_overloaded()
+    public function test_activestring_returns_uppercase_with_from_min_value()
     {
-        $test_string    = 'This is a string to capitalize for this test.';
-        $active_string  = new \activeseven\ActiveString($test_string);
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMAJORGENERALIVEINFORMATION';
+        $received_result    = $this->template_given_function_with_from(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            0
+        );
 
-        $expected       = 'THIS IS A STRING TO capitalize for this test.';
-
-        $received       = $active_string->toUppercase()->to(65)->get();
-        $this->assertEquals($expected,$received);
+        $this->assertEquals($expected_result,$received_result);
     }
-
-    public function test_class_returns_uppercase_with_negative_to()
+    public function test_activestring_returns_uppercase_with_from_max_value()
     {
-        $test_string    = 'This is a string to capitalize for this cool test.';
-        $active_string  = new \activeseven\ActiveString($test_string);
+        $expected_result    = 'iamtheverymodelofamodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            50
+        );
 
-        $expected       = 'THIS IS A STRING TO capitalize for this cool test.';
-        $received       = $active_string->toUppercase()->to(-30)->get();
-        $this->assertEquals($expected,$received);
+        $this->assertEquals($expected_result,$received_result);
     }
-    public function test_class_returns_uppercase_with_negative_to_min_value()
+    public function test_activestring_returns_uppercase_with_from_overloaded()
     {
-        $test_string    = 'This is a string to capitalize for this silly test';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'THIS IS A STRING TO CAPITALIZE FOR THIS SILLY TESt';
-        $received       = $active_string->toUppercase()->to(-1)->get();
-        $this->assertEquals($expected,$received);
+        $expected_result    = 'iamtheverymodelofamodernmAJORGENERALIVEINFORMATION';
+        $received_result    = $this->template_given_function_with_from(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            75
+        );
+        $this->assertEquals($expected_result, $received_result);
     }
-    public function test_class_returns_uppercase_with_negative_to_max_value()
+
+    public function test_activestring_returns_uppercase_with_negative_from()
     {
-        $test_string    = 'this is a string to capitalize for this silly test';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'this is a string to capitalize for this silly test';
-        $received       = $active_string->toUppercase()->to(-50)->get();
-        $this->assertEquals($expected,$received);
+        $expected_result    = 'iamtheverymodelofamodernmAJORGENERALIVEINFORMATION';
+        $received_result    = $this->template_given_function_with_from(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -25
+        );
+        $this->assertEquals($expected_result,$received_result);
     }
-    public function test_class_returns_uppercase_with_negative_to_overloaded()
+    public function test_activestring_returns_uppercase_with_negative_from_min_value()
     {
-        $test_string    = 'This is a string to capitalize for this cool test.';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'THIS IS A STRING TO capitalize for this cool test.';
-        $received       = $active_string->toUppercase()->to(-80)->get();
-        $this->assertEquals($expected,$received);
-
-        $received       = $active_string->toUppercase()->to(-130)->get();
-        $this->assertEquals($expected,$received);
+        $expected_result    = 'iamtheverymodelofamodernmajorgeneraliveinformatioN';
+        $received_result    = $this->template_given_function_with_from(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -1
+        );
+        $this->assertEquals($expected_result,$received_result);
     }
-
-    public function test_class_returns_uppercase_with_length() {
-        $test_string    = 'This is a string to capitalize for this cool test.';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'THIS IS A STRING TO CAPITALIZE for this cool test.';
-        $received       = $active_string->toUppercase()->forThisManyCharacters(30)->get();
-        $this->assertEquals($expected,$received);
-    }
-    public function test_class_returns_uppercase_with_length_min_value()
+    public function test_activestring_returns_uppercase_with_negative_from_max_value()
     {
-        $test_string    = 'This is a string to capitalize for this cool test.';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'This is a string to capitalize for this cool test.';
-        $received       = $active_string->toUppercase()->forThisManyCharacters(0)->get();
-        $this->assertEquals($expected,$received);
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMAJORGENERALIVEINFORMATION';
+        $received_result    = $this->template_given_function_with_from(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -50
+        );
+        $this->assertEquals($expected_result,$received_result);
     }
-    public function test_class_returns_uppercase_with_length_max_value()
+    public function test_activestring_returns_uppercase_with_negative_from_overloaded()
     {
-        $test_string    = 'This is a string to capitalize for this cool test.';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'THIS IS A STRING TO CAPITALIZE FOR THIS COOL TEST.';
-        $received       = $active_string->toUppercase()->forThisManyCharacters(50)->get();
-        $this->assertEquals($expected,$received);
+        $expected_result    = 'iamtheverymodelofamodernmAJORGENERALIVEINFORMATION';
+        $received_result    = $this->template_given_function_with_from(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -75
+        );
+        $this->assertEquals($expected_result,$received_result);
     }
-    public function test_class_returns_uppercase_with_length_overloaded()
+
+    public function test_activestring_returns_uppercase_with_to()
     {
-        $test_string    = 'This is a string to capitalize for this cool test.';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'THIS IS A STRING TO CAPITALIZE for this cool test.';
-        $received       = $active_string->toUppercase()->forThisManyCharacters(80)->get();
-        $this->assertEquals($expected,$received);
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            25
+        );
+        $this->assertEquals($expected_result,$received_result);
     }
-
-    public function test_class_returns_uppercase_with_negative_length() {
-        $test_string    = 'This is a string to capitalize for this cool test.';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'THIS IS A STRING TO CAPITALize for this cool test.';
-        $received       = $active_string->toUppercase()->forThisManyCharacters(-23)->get();
-        $this->assertEquals($expected,$received);
-    }
-    public function test_class_returns_uppercase_with_negative_length_min_value()
+    public function test_activestring_returns_uppercase_with_to_min_value()
     {
-        $test_string    = 'this is a string to capitalize for this silly test';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'THIS IS A STRING TO CAPITALIZE FOR THIS SILLY TESt';
-        $received       = $active_string->toUppercase()->forThisManyCharacters(-1)->get();
-        $this->assertEquals($expected,$received);
+        $expected_result    = 'iamtheverymodelofamodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            0
+        );
+        $this->assertEquals($expected_result,$received_result);
     }
-    public function test_class_returns_uppercase_with_negative_length_max_value()
+    public function test_activestring_returns_uppercase_with_to_max_value()
     {
-        $test_string    = 'this is a string to capitalize for this silly test';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'this is a string to capitalize for this silly test';
-        $received       = $active_string->toUppercase()->forThisManyCharacters(-50)->get();
-        $this->assertEquals($expected,$received);
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMAJORGENERALIVEINFORMATION';
+        $received_result    = $this->template_given_function_with_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            50
+        );
+        $this->assertEquals($expected_result,$received_result);
     }
-    public function test_class_returns_uppercase_with_negative_length_overloaded()
+    public function test_activestring_returns_uppercase_with_to_overloaded()
     {
-        $test_string    = 'This is a string to capitalize for this cool test.';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'THIS IS A STRING TO CAPITALIZE for this cool test.';
-        $received       = $active_string->toUppercase()->forThisManyCharacters(-70)->get();
-        $this->assertEquals($expected,$received);
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            75
+        );
+        $this->assertEquals($expected_result,$received_result);
     }
 
-    public function test_class_returns_uppercase_with_from_and_length()
+    public function test_activestring_returns_uppercase_with_negative_to()
     {
-        $test_string    = 'This is a string to capitalize for this cool testy';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'This is a string to CAPITALIZE for this cool testy';
-        $received       = $active_string->toUppercase()
-                            ->fromThisCharacterPosition(20)
-                            ->forThisManyCharacters(10)
-                            ->get();
-
-        $this->assertEquals($expected,$received);
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -25
+        );
+        $this->assertEquals($expected_result,$received_result);
     }
-    public function test_class_returns_uppercase_with_from_and_length_min_value()
+    public function test_activestring_returns_uppercase_with_negative_to_min_value()
     {
-        $test_string    = 'This is a string to capitalize for this cool testy';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'This is a string to capitalize for this cool testy';
-        $received       = $active_string->toUppercase()
-                            ->fromThisCharacterPosition(20)
-                            ->forThisManyCharacters(0)
-                            ->get();
-
-        $this->assertEquals($expected,$received);
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMAJORGENERALIVEINFORMATIOn';
+        $received_result    = $this->template_given_function_with_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -1
+        );
+        $this->assertEquals($expected_result,$received_result);
     }
-    public function test_class_returns_uppercase_with_from_and_length_max_value()
+    public function test_activestring_returns_uppercase_with_negative_to_max_value()
     {
-        $test_string    = 'This is a string to capitalize for this cool testy';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'This is a string to CAPITALIZE FOR THIS COOL TESTY';
-        $received       = $active_string->toUppercase()
-                            ->fromThisCharacterPosition(20)
-                            ->forThisManyCharacters(30)
-                            ->get();
-
-        $this->assertEquals($expected,$received);
+        $expected_result    = 'iamtheverymodelofamodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -50
+        );
+        $this->assertEquals($expected_result,$received_result);
     }
-    public function test_class_returns_uppercase_with_from_and_length_overloaded()
+    public function test_activestring_returns_uppercase_with_negative_to_overloaded()
     {
-        $test_string    = 'This is a string to capitalize for this cool testy';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'This is a string to CAPITALIZE FOR THIS COOL TESTY';
-        $received       = $active_string->toUppercase()
-                            ->fromThisCharacterPosition(20)
-                            ->forThisManyCharacters(99)
-                            ->get();
-
-        $this->assertEquals($expected,$received);
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -75
+        );
+        $this->assertEquals($expected_result,$received_result);
     }
-    public function test_class_returns_uppercase_with_from_overloaded_and_length_overloaded()
-    {
-        $test_string    = 'This is a string to capitalize for this cool testy';
-        $active_string  = new \activeseven\ActiveString($test_string);
 
-        $expected       = 'This is a string to cAPITALIZE FOR THIS COOL TESTY';
-        $received       = $active_string->toUppercase()
-            ->fromThisCharacterPosition(71)
-            ->forThisManyCharacters(99)
-            ->get();
-
-        $this->assertEquals($expected,$received);
+    public function test_activestring_returns_uppercase_with_length() {
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            25
+        );
+        $this->assertEquals($expected_result,$received_result);
     }
-    public function test_class_returns_uppercase_with_from_and_negative_length()
+    public function test_activestring_returns_uppercase_with_length_min_value()
     {
-        $test_string    = 'This is a string toe capitalize for this cool test';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        // Start should be 11 for a length of 9
-        $expected       = 'This is a sTRING TOE capitalize for this cool test';
-        $received       = $active_string->toUppercase()
-                            ->fromThisCharacterPosition(20)
-                            ->forThisManyCharacters(-9)
-                            ->get();
-
-        $this->assertEquals($expected,$received);
+        $expected_result    = 'iamtheverymodelofamodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            0
+        );
+        $this->assertEquals($expected_result,$received_result);
     }
-/*    public function test_class_returns_uppercase_with_offset_and_negative_length_min_value()
+    public function test_activestring_returns_uppercase_with_length_max_value()
     {
-        $test_string    = 'This is a string to capitalize for this cool testy';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'This is a strinG to capitalize for this cool testy';
-        $received       = $active_string->toUppercase()
-                            ->fromThisCharacterPosition(16)
-                            ->forThisManyCharacters(-1)
-                            ->get();
-
-        $this->assertEquals($expected,$received);
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMAJORGENERALIVEINFORMATION';
+        $received_result    = $this->template_given_function_with_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            50
+        );
+        $this->assertEquals($expected_result,$received_result);
     }
-    public function test_class_returns_uppercase_with_offset_and_negative_length_max_value()
+    public function test_activestring_returns_uppercase_with_length_overloaded()
     {
-        $test_string    = 'This is a string to capitalize for this cool testy';
-        $active_string  = new \activeseven\ActiveString($test_string);
-
-        $expected       = 'THIS IS A STRING TO CAPITALIZE for this cool testy';
-        $received       = $active_string->toUppercase()
-                            ->fromThisCharacterPosition(30)
-                            ->forThisManyCharacters(-30)
-                            ->get();
-
-        $this->assertEquals($expected,$received);
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            75
+        );
+        $this->assertEquals($expected_result,$received_result);
     }
-    public function test_class_returns_uppercase_with_offset_and_negative_length_overloaded()
+
+    public function test_activestring_returns_uppercase_with_negative_length() {
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -25
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_length_min_value()
     {
-        $test_string    = 'This is a string to capitalize for this cool test.';
-        $active_string  = new \activeseven\ActiveString($test_string);
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMAJORGENERALIVEINFORMATIOn';
+        $received_result    = $this->template_given_function_with_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -1
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_length_max_value()
+    {
+        $expected_result    = 'iamtheverymodelofamodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -50
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_length_overloaded()
+    {
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -75
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
 
-        $expected       = 'THIS IS A STRING to capitalize for this cool test.';
-        $received       = $active_string->toUppercase()
-                            ->fromThisCharacterPosition(16)
-                            ->forThisManyCharacters(-99)
-                            ->get();
+    public function test_activestring_returns_uppercase_with_from_and_length()
+    {
+        $expected_result    = 'iamtheverymodelofamoDERNMAJORGeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            20,10
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_from_and_length_min_value()
+    {
+        $expected_result    = 'iamtheverymodelofamodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            20,0
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_from_and_length_max_value()
+    {
+        $expected_result    = 'iamtheverymodelofamoDERNMAJORGENERALIVEINFORMATION';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            20,30
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_from_and_length_same_value()
+    {
+        $expected_result    = 'iamtheverymodelofamodernmajorgeneraliVEINFORMATION';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            37,37
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_from_and_length_overloaded()
+    {
+        $expected_result    = 'iamtheverymodelofamoDERNMAJORGENERALIVEINFORMATION';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            20,99
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_from_overloaded_and_length_overloaded()
+    {
+        $expected_result    = 'iamtheverymodelofamoDERNMAJORGENERALIVEINFORMATION';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            70,99
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
 
-        $this->assertEquals($expected,$received);
-    }*/
-//
-//
-//    public function test_class_returns_uppercase_with_negative_offset_length()
-//    {
-//        $test_string    = 'This is a string to capitalize for this test.';
-//        $active_string  = new \activeseven\ActiveString($test_string);
-//
-//        $expected       = 'This is a string to CAPITALIZE for this test.';
-//        $received       = $active_string->toUppercase()
-//                            ->fromThisCharacterPosition(-25)
-//                            ->forThisManyCharacters(10)
-//                            ->get();
-//
-//        $this->assertEquals($expected,$received);
-//    }
-//
-//    public function test_class_returns_uppercase_with_negative_offset_and_negative_length()
-//    {
-//        $test_string    = 'This is a string to capitalize for this test.';
-//        $active_string  = new \activeseven\ActiveString($test_string);
-//
-//        $expected       = 'This is a string to CAPITALIZE for this test.';
-//        $received       = $active_string->toUppercase()
-//                            ->fromThisCharacterPosition(-25)
-//                            ->forThisManyCharacters(-15)
-//                            ->get();
-//
-//        $this->assertEquals($expected,$received);
-//    }
-//
-//    public function test_class_returns_uppercase_with_offset_and_to()
-//    {
-//        $test_string    = 'This is a string to capitalize for this test.';
-//        $active_string  = new \activeseven\ActiveString($test_string);
-//
-//        $expected       = 'This is a string to CAPITALIZE for this test.';
-//        $received       = $active_string->toUppercase()
-//            ->fromThisCharacterPosition(20)
-//            ->toThisCharacterPosition(30)
-//            ->get();
-//
-//        $this->assertEquals($expected,$received);
-//    }
-//
-//    public function test_class_returns_uppercase_with_negative_offset_to()
-//    {
-//        $test_string    = 'This is a string to capitalize for this test.';
-//        $active_string  = new \activeseven\ActiveString($test_string);
-//
-//        $expected       = 'This is a string to CAPITALIZE for this test.';
-//        $received       = $active_string->toUppercase()
-//            ->fromThisCharacterPosition(-25)
-//            ->toThisCharacterPosition(30)
-//            ->get();
-//
-//        $this->assertEquals($expected,$received);
-//    }
-//
-//
-//    // LOWERCASE Tests
-//    public function test_class_returns_lowercase_with_offset_only()
-//    {
-//        $test_string    = 'THIS IS A STRING TO CAPITALIZE FOR THIS COOL TEST.';
-//        $active_string  = new \activeseven\ActiveString($test_string);
-//
-//        $expected       = 'THIS IS A STRING TO capitalize for this cool test.';
-//        $received       = $active_string->toLowercase()->from(20)->get();
-//        $this->assertEquals($expected,$received);
-//
-//        $received       = $active_string->toLowercase()->from(70)->get();
-//        $this->assertEquals($expected,$received);
-//
-//        $received       = $active_string->toLowercase()->from(120)->get();
-//        $this->assertEquals($expected,$received);
-//    }
-//
-//    public function test_class_returns_lowercase_with_offset_min_value()
-//    {
-//        $test_string    = 'THIS IS A STRING TO CAPITALIZE FOR THIS TEST.';
-//        $active_string  = new \activeseven\ActiveString($test_string);
-//
-//        $expected       = 'this is a string to capitalize for this test.';
-//        $received       = $active_string->toLowercase()->from(0)->get();
-//
-//        $this->assertEquals($expected,$received);
-//    }
-//
-//    public function test_class_returns_lowercase_with_offset_in_middle()
-//    {
-//        $test_string    = 'THIS IS A STRING TO CAPITALIZE FOR THIS TEST.';
-//        $active_string  = new \activeseven\ActiveString($test_string);
-//
-//        $expected       = 'THIS IS A STRING TO capitalize for this test.';
-//        $received       = $active_string->toLowercase()->from(20)->get();
-//
-//        $this->assertEquals($expected,$received);
-//    }
-//
-//    public function test_class_returns_lowercase_with_offset_max_value()
-//    {
-//        $test_string    = 'THIS IS A STRING TO CAPITALIZE FOR THIS TEST';
-//        $active_string  = new \activeseven\ActiveString($test_string);
-//
-//        $expected       = 'THIS IS A STRING TO CAPITALIZE FOR THIS TEST';
-//        $received       = $active_string->toUppercase()->from(44)->get();
-//
-//        $this->assertEquals($expected,$received);
-//    }
-//
-//    public function test_class_returns_lowercase_with_offset_negative()
-//    {
-//        $test_string    = 'THIS IS A STRING TO CAPITALIZE FOR THIS TEST.';
-//        $active_string  = new \activeseven\ActiveString($test_string);
-//
-//        $expected       = 'THIS IS A STRING TO CAPITALIZE FOR THIS test.';
-//        $received       = $active_string->toLowercase()->from(-5)->get();
-//        $this->assertEquals($expected,$received);
-//
-//        $received       = $active_string->toLowercase()->from(-50)->get();
-//        $this->assertEquals($expected,$received);
-//
-//        $received       = $active_string->toLowercase()->from(-95)->get();
-//        $this->assertEquals($expected,$received);
-//    }
-//
-//    public function test_class_returns_lowercase_with_offset_and_length()
-//    {
-//        $test_string    = 'THIS IS A STRING TO CAPITALIZE FOR THIS TEST.';
-//        $active_string  = new \activeseven\ActiveString($test_string);
-//
-//        $expected       = 'THIS IS A STRING TO capitalize FOR THIS TEST.';
-//        $received       = $active_string->toLowercase()
-//            ->fromThisCharacterPosition(20)
-//            ->forThisManyCharacters(10)
-//            ->get();
-//
-//        $this->assertEquals($expected,$received);
-//    }
-//
-//    public function test_class_returns_lowercase_with_offset_and_to()
-//    {
-//        $test_string    = 'THIS IS A STRING TO CAPITALIZE FOR THIS TEST.';
-//        $active_string  = new \activeseven\ActiveString($test_string);
-//
-//        $expected       = 'THIS IS A STRING TO capitalize FOR THIS TEST.';
-//        $received       = $active_string->toLowercase()
-//            ->fromThisCharacterPosition(20)
-//            ->toThisCharacterPosition(30)
-//            ->get();
-//
-//        $this->assertEquals($expected,$received);
-//    }
-//
-//    public function test_class_returns_lowercase_with_negative_offset_length()
-//    {
-//        $test_string    = 'THIS IS A STRING TO CAPITALIZE FOR THIS TEST.';
-//        $active_string  = new \activeseven\ActiveString($test_string);
-//
-//        $expected       = 'THIS IS A STRING TO capitalize FOR THIS TEST.';
-//        $received       = $active_string->toLowercase()
-//            ->fromThisCharacterPosition(-25)
-//            ->forThisManyCharacters(10)
-//            ->get();
-//
-//        $this->assertEquals($expected,$received);
-//    }
-//
-//    public function test_class_returns_lowercase_with_negative_offset_to()
-//    {
-//        $test_string    = 'THIS IS A STRING TO CAPITALIZE FOR THIS TEST.';
-//        $active_string  = new \activeseven\ActiveString($test_string);
-//
-//        $expected       = 'THIS IS A STRING TO capitalize FOR THIS TEST.';
-//        $received       = $active_string->toLowercase()
-//            ->fromThisCharacterPosition(-25)
-//            ->toThisCharacterPosition(30)
-//            ->get();
-//
-//        $this->assertEquals($expected,$received);
-//    }
-//
-//
-//
-//    public function test_class_returns_all_lowercase()
-//    {
-//        $test_string    = 'THIS IS AN ALL UPPERCASE STRING';
-//        $active_string  = new \activeseven\ActiveString($test_string);
-//
-//        $expected       = strtolower($test_string);
-//        $received       = $active_string->toLowercase()->get();
-//        $this->assertEquals($expected,$received);
-//    }
-//
-//    public function test_class_returns_correct_string_when_undone()
-//    {
-//        $original_string    = 'This is a test string';
-//        $active_string      = new \activeseven\ActiveString($original_string);
-//
-//        $modified_string    = strtoupper($original_string);
-//        $received           = $active_string->toUppercase()->get();
-//        $this->assertEquals($modified_string,$received);
-//
-//        $undone_string      = $active_string->undo()->get();
-//        $this->assertEquals($original_string,$undone_string);
-//    }
-//
-//    public function test_class_cannot_undo_original_string()
-//    {
-//        $test_string    = 'This is a test string';
-//        $active_string  = new \activeseven\ActiveString($test_string);
-//
-//        $active_string->undo();
-//        $this->assertEquals($test_string,$active_string);
-//    }
-//
-//    // Testing Validators
-//
-//    public function test_class_can_validate_url()
-//    {
-//        $is_url_string      = 'https://www.somedomain.com';
-//
-//        $active_string      = new \activeseven\ActiveString($is_url_string);
-//        $this->assertTrue(
-//            $active_string->isUrl(),
-//            "ActiveString::isUrl thinks {$is_url_string} is NOT a valid URL."
-//        );
-//    }
-//
-//    public function test_class_can_validate_domain()
-//    {
-//        $is_domain_string   = 'www.activeseven.com'; // Gonna put a site here one day LOL
-//
-//        $active_string = new \activeseven\ActiveString($is_domain_string);
-//        $this->assertTrue(
-//            $active_string->isDomain(),
-//            "ActiveString::isDomain() thinks {$is_domain_string} us not a valid domain."
-//        );
-//    }
-//
-//    public function test_class_can_validate_email()
-//    {
-//        $is_email_string    = 'someone@somehwere.com';
-//
-//        $active_string      = new \activeseven\ActiveString($is_email_string);
-//        $this->assertTrue(
-//            $active_string->isEmail(),
-//            "ActiveString::isEmail() thinks {$is_email_string} is NOT a valid email."
-//        );
-//    }
-//
-//    public function test_class_can_validate_ipv6()
-//    {
-//        $ipv6_string    = '2001:db8:3333:4444:5555:6666:7777:8888';
-//
-//        $active_string  = new \activeseven\ActiveString($ipv6_string);
-//        $this->assertTrue(
-//            $active_string->isIpv6(),
-//            "ActiveString::isIpv6() thinks {$ipv6_string} is NOT a valid IPv6 address."
-//        );
-//    }
-//
-//    public function test_class_can_validate_ipv4()
-//    {
-//        $ipv4_string    = '192.0.2.146';
-//
-//        $active_string  = new \activeseven\ActiveString($ipv4_string);
-//        $this->assertTrue(
-//            $active_string->isIpv4(),
-//            "ActiveString::isIpv4() thinks {$ipv4_string} is NOT a valid IPv4 address."
-//        );
-//    }
-//
-//    public function test_class_can_validate_ip()
-//    {
-//        $ipv4_string    = '192.0.2.199';
-//        $ipv6_string    = '2001:db8:8888:4444:5555:6666:7777:3333';
-//
-//        $ipv4   = new \activeseven\ActiveString($ipv4_string);
-//        $ipv6   = new \activeseven\ActiveString($ipv6_string);
-//
-//        $this->assertTrue(
-//            $ipv4->isIp(),
-//            "ActiveString::isIp() thinks {$ipv4} is NOT a valid IP address."
-//        );
-//        $this->assertTrue(
-//            $ipv6->isIp(),
-//            "ActiveString::isIp() thinks {$ipv6} is NOT a valid IP address."
-//        );
-//    }
-//
-//    public function test_class_can_validate_mac()
-//    {
-//        $mac_string     = '00:1B:44:11:3A:B7';
-//
-//        $active_string  = new \activeseven\ActiveString($mac_string);
-//        $this->assertTrue(
-//            $active_string->isMac(),
-//            "ActiveString::isMac() thinks {$mac_string} is NOT a valid mac address."
-//        );
-//    }
-//
-//    public function test_class_can_urlencode_string()
+    public function test_activestring_returns_uppercase_with_from_and_negative_length()
+    {
+        $expected_result    = 'iamthEVERYModelofamodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            11,-6
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_from_and_negative_length_min_value()
+    {
+        $expected_result    = 'iamtheverymodelofamodernmajorgeneraliveinfoRmation';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            44,-1
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_from_and_negative_length_max_value()
+    {
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMAjorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            26,-26
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_from_and_negative_length_same_value()
+    {
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMAJORGENERALIVEINformation';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            41,-41
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_from_and_negative_length_overloaded()
+    {
+        $expected_result    = 'IAMTHEVERYMODelofamodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            13,-99
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+
+    public function test_activestring_returns_uppercase_with_negative_from_and_length()
+    {
+        $expected_result    = 'iamtheverymodelofaMODERNMAJORGENERALiveinformation';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -32,18
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_length_min_value()
+    {
+        $expected_result    = 'iamtheverymodelofamodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -25,0
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_length_max_value()
+    {
+        $expected_result    = 'iamtheverymodelofamodernmAJORGENERALIVEINFORMATION';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -25,25
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_length_same_value()
+    {
+        $expected_result    = 'iamtheverymodelofamodernmajorgeneraliveiNFORMATION';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -10,10
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_length_overloaded()
+    {
+        $expected_result    = 'iamtheverymodelofamodernmAJORGENERALIVEINFORMATION';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -25,99
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_overloaded_and_length_overloaded()
+    {
+        $expected_result    = 'iamtheverymodelofamodernmAJORGENERALIVEINFORMATION';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -75,99
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+
+    public function test_activestring_returns_uppercase_with_negative_from_and_negative_length()
+    {
+        $expected_result    = 'iamtheverymodelofamodernMAJORGENERALiveinformation';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -14,-12
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_negative_length_min_value()
+    {
+        $expected_result    = 'iamtheverymodelofamodernMAJORGENERALiveinformation';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -14,-12
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_negative_length_max_value()
+    {
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -25,-25
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_negative_length_overloaded()
+    {
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -25,-99
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+
+    public function test_activestring_returns_uppercase_with_from_and_to()
+    {
+        $expected_result    = 'iamtheverymodelofaMODERNMAJORGENERALiveinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            18,36
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_from_and_to_min_value()
+    {
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            25,0
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_from_and_to_max_value()
+    {
+        $expected_result    = 'iamtheverymodelofamodernmAJORGENERALIVEINFORMATION';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            25,50
+        );
+        $this->assertEquals($expected_result,$received_result);
+
+    }
+    public function test_activestring_returns_uppercase_with_from_and_to_same_value()
+    {
+        $expected_result    = 'iamtheverymodelofamodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            16,16
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_from_and_to_overloaded()
+    {
+        $expected_result    = 'iamtheverymodelofamodernmAJORGENERALIVEINFORMATION';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            25,99
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+
+    public function test_activestring_returns_uppercase_with_from_and_negative_to()
+    {
+        $expected_result    = 'iamtheverymodelofamodernmajorgenERALIVEinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            39,-18
+        );
+        $this->assertEquals($expected_result,$received_result);
+
+    }
+    public function test_activestring_returns_uppercase_with_from_and_negative_to_min_value()
+    {
+        $expected_result    = 'iamtheverymodelofaMODERNMAJORGENERALIVEINFORMATIOn';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            18,-1
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_from_and_negative_to_max_value()
+    {
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            25,-50
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_from_and_negative_to_same_value()
+    {
+        $expected_result    = 'iamtheveryMODELOFAMODERNMAJORGENERALIVEInformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            10,-10
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_from_and_negative_to_overloaded()
+    {
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            25,-99
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_from_and_negative_to_overlap()
+    {
+        $expected_result    = 'iamtheverymodelofaMODERNMAJORGENERALiveinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            36,-32
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_from_and_negative_to_no_overlap()
+    {
+        $expected_result    = 'iamTHEVERYMODELOFAMODERNMAJORGENERALIVEinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            3,-11
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+
+    public function test_activestring_returns_uppercase_with_negative_from_and_to()
+    {
+        $expected_result    = 'iamtheverymodelofaMODERNMAJORGENERALiveinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -32,36
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_to_min_value()
+    {
+        $expected_result    = 'IAMTHEVERYMODELOFAmodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -32,0
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_to_max_value()
+    {
+        $expected_result    = 'iamtheverymodelofamodernmajorgeneRALIVEINFORMATION';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -17,50
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_to_same_value()
+    {
+        $expected_result    = 'iamtheverymodelofamodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -13,-13
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_to_overloaded()
+    {
+        $expected_result    = 'iamtheveRYMODELOFAMODERNMAJORGENERALiveinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -42,86
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_to_overlap()
+    {
+        $expected_result    = 'iamtheverymodelofaMODERNMAJORGENERALiveinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -32,36
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_to_no_overlap()
+    {
+        $expected_result    = 'iamtheVERYMODELofamodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -35,6
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+
+    public function test_activestring_returns_uppercase_with_negative_from_and_negative_to()
+    {
+        $expected_result    = 'iamTHEVERYMODELOFAMODERNMAJORGEneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -47,-19
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_negative_to_min_value()
+    {
+        $expected_result    = 'iamtheverymodelofamodernmajorgENERALIVEINFORMATIOn';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -20,-1
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_negative_to_max_value()
+    {
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMAJORGENERALiveinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -14,-50
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_negative_to_same_value()
+    {
+        $expected_result    = 'iamtheverymodelofamodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -31,-31
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_negative_to_overlap()
+    {
+        $expected_result    = 'iAMTHEVERymodelofamodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -41,-49
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_negative_to_no_overlap()
+    {
+        $expected_result    = 'iamtheverymodELOFAMODERNMAJOrgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_to(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -37,-22
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+
+//
+//    public function test_activestring_can_urlencode_string()
 //    {
 //        $url_to_encode  = 'https://www.somewhere.com/index.php?option=1&argument=false';
 //        $active_string  = new \activeseven\ActiveString($url_to_encode);
@@ -720,7 +943,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_can_urldecode_string()
+//    public function test_activestring_can_urldecode_string()
 //    {
 //        $url_encoded    = 'https%3A%2F%2Fwww.somewhere.com%2Findex.php%3Foption%3D1%26argument%3Dfalse';
 //        $active_string  = new \activeseven\ActiveString($url_encoded);
@@ -733,7 +956,7 @@ class ActiveStringTest extends TestCase
 
     // Testing Sanitizers
 
-//    public function test_class_can_sanitize_email()
+//    public function test_activestring_can_sanitize_email()
 //    {
 //        $email_to_sanitize  = 'someone\@somehwere<>./com';
 //        $active_string  = new \activeseven\ActiveString($email_to_sanitize);
@@ -744,7 +967,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_can_strip_low()
+//    public function test_activestring_can_strip_low()
 //    {
 //        $test_string    = 'https://www.somedomain.com/index.html?message=blah' . chr(24);
 //        $active_string  = new \activeseven\ActiveString($test_string);
@@ -758,7 +981,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_can_strip_high()
+//    public function test_activestring_can_strip_high()
 //    {
 //        $test_string    = 'https://www.somedomain.com/index.html?message=blah' . chr(255);
 //        $active_string  = new \activeseven\ActiveString($test_string);
@@ -773,7 +996,7 @@ class ActiveStringTest extends TestCase
 //
 //    }
 //
-//    public function test_class_can_strip_backtick()
+//    public function test_activestring_can_strip_backtick()
 //    {
 //        $test_string    = 'some string with a ` backtick';
 //        $active_string  = new \activeseven\ActiveString($test_string);
@@ -787,7 +1010,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_can_encode_low()
+//    public function test_activestring_can_encode_low()
 //    {
 //        // Sooooo...ascii 32 is the space character and we got some trimming going on here.
 //        $test_string    = 'some string with Ascii values lower than 32' . chr(1) . chr(31);
@@ -802,7 +1025,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_can_encode_high()
+//    public function test_activestring_can_encode_high()
 //    {
 //        $test_string    = 'some string with Ascii values higher than 127' . chr(127) . chr(255);
 //        $active_string  = new \activeseven\ActiveString($test_string);
@@ -816,7 +1039,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_can_magic_quotes()
+//    public function test_activestring_can_magic_quotes()
 //    {
 //        // @TODO Deprecated as of 7.3 and totally not a thing in 8.0.
 //        // We're not running 8.0 yet soooooo.....
@@ -832,7 +1055,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_can_add_slashes()
+//    public function test_activestring_can_add_slashes()
 //    {
 //        // Only available as of 7.3
 //        $test_string    = 'some string with "quotes" in it.';
@@ -847,7 +1070,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_can_html_encode()
+//    public function test_activestring_can_html_encode()
 //    {
 //        $test_string    = 'some <string> & to "HTML" encode.';
 //        $active_string  = new \activeseven\ActiveString($test_string);
@@ -861,7 +1084,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_can_html_encode_without_quotes()
+//    public function test_activestring_can_html_encode_without_quotes()
 //    {
 //        $test_string    = 'some <string> $ to "HTML" encode without the quotes though.';
 //        $active_string  = new \activeseven\ActiveString($test_string);
@@ -879,7 +1102,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_can_check_if_string_has_another_string()
+//    public function test_activestring_can_check_if_string_has_another_string()
 //    {
 //        $test_string    = "Some string to use for this string test.";
 //        $active_string  = new \activeseven\ActiveString($test_string);
@@ -894,7 +1117,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_can_return_sub_string()
+//    public function test_activestring_can_return_sub_string()
 //    {
 //        $test_string    = "Some string to use for this crazy-ass test.";
 //        $active_string  = new \activeseven\ActiveString($test_string);
@@ -912,7 +1135,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_can_return_sub_string_with_sticky_change()
+//    public function test_activestring_can_return_sub_string_with_sticky_change()
 //    {
 //        $test_string    = "Some string to use for this dumb-shit test.";
 //        $active_string  = new \activeseven\ActiveString($test_string);
@@ -930,7 +1153,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_returns_position_of_string_case_sensitive()
+//    public function test_activestring_returns_position_of_string_case_sensitive()
 //    {
 //        $test_string    = "Some string to use for this ass-munchin test.";
 //        $active_string  = new \activeseven\ActiveString($test_string);
@@ -945,7 +1168,7 @@ class ActiveStringTest extends TestCase
 //        $this->assertFalse($position_of);
 //    }
 //
-//    public function test_class_returns_position_of_string_case_insensitive()
+//    public function test_activestring_returns_position_of_string_case_insensitive()
 //    {
 //        $test_string    = "Some string to use for this ass-munchin test.";
 //        $active_string  = new \activeseven\ActiveString($test_string);
@@ -957,7 +1180,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_returns_false_when_string_position_not_found()
+//    public function test_activestring_returns_false_when_string_position_not_found()
 //    {
 //        $test_string    = "Some string to use for this titty-twisting test.";
 //        $active_string  = new \activeseven\ActiveString($test_string);
@@ -965,7 +1188,7 @@ class ActiveStringTest extends TestCase
 //        $this->assertFalse($active_string->positionOf("purple-nurple"));
 //    }
 //
-//    public function test_class_can_replace_strings_with_string()
+//    public function test_activestring_can_replace_strings_with_string()
 //    {
 //        $test_string    = 'Some string to use for this titty-twisting test.';
 //        $search_for     = 'titty-twisting';
@@ -980,7 +1203,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_can_replace_strings_with_array_of_same_size()
+//    public function test_activestring_can_replace_strings_with_array_of_same_size()
 //    {
 //        $test_string    = 'Some silly-philly string to use for this titty-twisting test.';
 //        $search_for     = ['silly-philly','titty-twisting'];
@@ -997,7 +1220,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_can_replace_strings_with_search_array_larger_than_replace_array()
+//    public function test_activestring_can_replace_strings_with_search_array_larger_than_replace_array()
 //    {
 //        $test_string    = 'Some silly-philly string to use for this titty-twisting test.';
 //        $search_for     = ['silly-philly','titty-twisting'];
@@ -1014,7 +1237,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_can_replace_strings_with_search_array_and_replace_as_string()
+//    public function test_activestring_can_replace_strings_with_search_array_and_replace_as_string()
 //    {
 //        $test_string    = 'Some silly-philly string to use for this titty-twisting test.';
 //        $search_for     = ['silly-philly','titty-twisting'];
@@ -1032,7 +1255,7 @@ class ActiveStringTest extends TestCase
 //
 //    }
 //
-//    public function test_class_can_toggle_case_sensitivity()
+//    public function test_activestring_can_toggle_case_sensitivity()
 //    {
 //        $active_string  = new \activeseven\ActiveString();
 //        $active_string->caseSensitive();
@@ -1042,7 +1265,7 @@ class ActiveStringTest extends TestCase
 //        $this->assertFalse($active_string->isCaseSensitive());
 //    }
 //
-//    public function test_class_can_replace_strings_with_string_case_insensitive()
+//    public function test_activestring_can_replace_strings_with_string_case_insensitive()
 //    {
 //        $test_string    = 'Some string to use for this Titty-Twisting test.';
 //        $search_for     = 'titty-twisting';
@@ -1057,7 +1280,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_can_replace_strings_with_array_of_same_size_case_insensitive()
+//    public function test_activestring_can_replace_strings_with_array_of_same_size_case_insensitive()
 //    {
 //        $test_string    = 'Some Silly-Philly string to use for this Titty-Twisting test.';
 //        $search_for     = ['silly-philly','titty-twisting'];
@@ -1074,7 +1297,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_can_replace_strings_with_search_array_larger_than_replace_array_case_insensitive()
+//    public function test_activestring_can_replace_strings_with_search_array_larger_than_replace_array_case_insensitive()
 //    {
 //        $test_string    = 'Some Silly-Philly string to use for this Titty-Twisting test.';
 //        $search_for     = ['silly-philly','titty-twisting'];
@@ -1091,7 +1314,7 @@ class ActiveStringTest extends TestCase
 //        );
 //    }
 //
-//    public function test_class_can_replace_strings_with_search_array_and_replace_as_string_case_insensitive()
+//    public function test_activestring_can_replace_strings_with_search_array_and_replace_as_string_case_insensitive()
 //    {
 //        $test_string    = 'Some Silly-Philly string to use for this Titty-Twisting test.';
 //        $search_for     = ['silly-philly','titty-twisting'];
@@ -1109,7 +1332,7 @@ class ActiveStringTest extends TestCase
 //
 //    }
 //
-//    public function test_class_can_count_words_in_string()
+//    public function test_activestring_can_count_words_in_string()
 //    {
 //        $test_string    = 'Some Silly-Philly string to use for this Titty-Twisting test.';
 //        $active_string  = new \activeseven\ActiveString($test_string);
@@ -1120,7 +1343,7 @@ class ActiveStringTest extends TestCase
 //        $this->assertEquals($expected,$result);
 //    }
 //
-//    public function test_class_can_count_words_in_string_with_user_specified_words()
+//    public function test_activestring_can_count_words_in_string_with_user_specified_words()
 //    {
 //        $test_string    = 'Some s1lly string to use for this fri3ndly test.';
 //        $extra_chars    = '13';
@@ -1133,7 +1356,7 @@ class ActiveStringTest extends TestCase
 //
 //    }
 //
-//    public function test_class_can_return_words_in_string()
+//    public function test_activestring_can_return_words_in_string()
 //    {
 //        $test_string    = 'Some Silly-Philly string to use for this Titty-Twisting test.';
 //        $active_string  = new \activeseven\ActiveString($test_string);
@@ -1144,7 +1367,7 @@ class ActiveStringTest extends TestCase
 //        $this->assertEquals($expected,$result);
 //    }
 //
-//    public function test_class_can_return_words_in_string_with_user_specified_words()
+//    public function test_activestring_can_return_words_in_string_with_user_specified_words()
 //    {
 //        $test_string    = 'Some s1lly string to use for this fri3ndly test.';
 //        $extra_chars    = '13';
@@ -1156,7 +1379,7 @@ class ActiveStringTest extends TestCase
 //        $this->assertEquals($expected,$result);
 //    }
 //
-//    public function test_class_can_return_words_their_positions_from_string()
+//    public function test_activestring_can_return_words_their_positions_from_string()
 //    {
 //        $test_string    = 'Some Silly-Philly string to use for this Titty-Twisting test.';
 //        $active_string  = new \activeseven\ActiveString($test_string);
@@ -1168,7 +1391,7 @@ class ActiveStringTest extends TestCase
 //
 //    }
 //
-//    public function test_class_can_return_words_their_positions_from_string_with_user_specified_words()
+//    public function test_activestring_can_return_words_their_positions_from_string_with_user_specified_words()
 //    {
 //        $test_string    = 'Some s1lly string to use for this fri3ndly test.';
 //        $extra_chars    = '13';
@@ -1180,7 +1403,7 @@ class ActiveStringTest extends TestCase
 //        $this->assertEquals($expected,$result);
 //    }
 //
-//    public function test_class_can_return_length_of_string()
+//    public function test_activestring_can_return_length_of_string()
 //    {
 //        $test_string    = 'I am the very model of a modern major general.';
 //        $active_string  = new \activeseven\ActiveString($test_string);

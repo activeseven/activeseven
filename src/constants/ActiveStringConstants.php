@@ -11,5 +11,4 @@ interface ActiveStringConstants
     public const UPPERCASE  = 'UPPERCASE';
     public const LOWERCASE  = 'LOWERCASE';
     public const UNDO = 'UNDO';
-
 }
