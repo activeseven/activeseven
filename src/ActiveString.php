@@ -246,63 +246,48 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
         $calculated_start_position      = $this->calculateStartPosition();
         $given_start_position           = $this->getStartPosition();
 
-        // If we only have a LENGTH position but no End
+        // First we change to see if the user sent us a LENGTH or if the users specified and END position.
         // In the event that we have both LENGTH and END then LENGTH takes priority.
         if( ($this->hasLengthPosition() && !$this->hasEndPosition()) ||
             ($this->hasLengthPosition() && $this->hasEndPosition())) {
+            // HAS LENGTH
 
             $length_position = $this->getLengthPosition();
-
             switch( true ) {
                 case( $length_position > 0):
                     // POSITIVE LENGTH
-                    if( $calculated_start_position < 0 ) {
-                        // NEGATIVE START + POSITIVE LENGTH
-                        // @TODO um, calculated start is like....always positive though?
-                    } else {
-                        // POSITIVE START + POSITIVE LENGTH
-                        if( $length_position > $string_length ) {
-                            $length_position = $string_length;
-                        }
+                    if( $length_position > $string_length ) {
+                        $length_position = $string_length;
                     }
-
                     break;
                 case ($length_position < 0):
                     // NEGATIVE LENGTH
-                    if( $calculated_start_position < 0 ) {
-                        // NEGATIVE START + NEGATIVE LENGTH
-                        // @TODO Ok but what if length_position is greater than start_position?
-                        $length_position = abs($given_start_position) - abs($length_position);
-                    } else {
-                        // POSITIVE START + NEGATIVE LENGTH
-                        if( abs($length_position) > $string_length) {
-                            // Length Overloaded
-                            if( $calculated_start_position > 0 ) {
-                                $this->setStartPosition(0);
-                                $subtract_this_from_string_length = $string_length - abs($calculated_start_position);
-                                // needs to be
-                            } else {
-                                $mod = abs($length_position) % $string_length;
-                                $subtract_this_from_string_length = ($mod + $calculated_start_position);
-                                if( $mod == 0 ) {
-                                    $subtract_this_from_string_length = $string_length;
-                                }
-                            }
+                    if( $calculated_start_position == 0 ) {
+                        // NEGATIVE LENGTH / ZERO START POSITION
+                        if( $string_length < abs($length_position) ) {
+                            // NEGATIVE LENGTH / ZERO START POSITION / OVERLOADED
+                            $mod = abs($length_position) % $string_length;
+                            $length_position = $string_length - $mod;
                         } else {
-                            // Length Not overloaded
-                            if( $calculated_start_position == 0) {
-                                $subtract_this_from_string_length = abs($length_position);
-                            } else {
-                                $new_start_position = $calculated_start_position - abs($length_position);
-                                $this->setStartPosition($new_start_position);
-                                $subtract_this_from_string_length = $string_length - abs($length_position);
-                            }
+                            // NEGATIVE LENGTH / ZERO START POSITION / NOT OVERLOADED
+                            $length_position = $string_length - abs($length_position);
                         }
-                        $length_position = $string_length - $subtract_this_from_string_length;
-
+                    } else {
+                        // NEGATIVE LENGTH / POSITIVE START POSITION
+                        if( $calculated_start_position < abs($length_position) ) {
+                            // NEGATIVE LENGTH / POSITIVE START POSITION / OVERLOADED
+                            $this->setStartPosition(0);
+                            $length_position = $calculated_start_position;
+                        } else {
+                            // NEGATIVE LENGTH / POSITIVE START POSITION / NOT OVERLOADED
+                            $new_start_position = $calculated_start_position - abs($length_position);
+                            $this->setStartPosition($new_start_position);
+                            $length_position = $calculated_start_position - $new_start_position;
+                        }
                     }
                     break;
                 default:
+                    // ZERO LENGTH
                     $length_position = 0;
                     break;
             }
@@ -310,69 +295,58 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
 
         // If we only have an END position but no LENGTH
         if( !$this->hasLengthPosition() && $this->hasEndPosition() ) {
+            // HAS CHARACTER POSITION
 
             $given_end_position = $this->getEndPosition();
-
-            // @TODO check start_position as well? What if Start > End?
             switch( true ) {
                 case ($given_end_position > 0 ):
-                    // POSITIVE END
-                    // CHECK - OVERLOADED
+                    // POSITIVE CHARACTER POSITION
                     $overload_meter = ( abs($given_end_position) / $string_length );
                     switch( true ) {
                         case ($overload_meter > 1):
-                            // POSITIVE END / OVERLOADED
-                            // CHECK - START
+                            // POSITIVE CHARACTER POSITION / OVERLOADED
                             if( $calculated_start_position == 0 ) {
                                 $length_position = ( abs($given_end_position) % $string_length);
                             } else {
                                 if( $given_start_position >= 0 ) {
                                     $length_position = $string_length - $calculated_start_position;
                                 } else {
-                                    // @TODO stopped here.
                                     $mod = $given_end_position % $string_length;
                                     $length_position = $mod - $calculated_start_position;
                                 }
                             }
                             break;
                         case ($overload_meter < 1):
-                            // POSITIVE END / NOT OVERLOADED
-                            // CHECK - START
-                            if( $calculated_start_position > 0) {
-                                // POSITIVE END / NOT OVERLOADED / START > 0
-                                // Need an overlap check here
+                            // POSITIVE CHARACTER POSITION / NOT OVERLOADED
+                            if( $calculated_start_position == 0 ) {
+                                $length_position = $given_end_position;
+                            } else {
                                 if( $calculated_start_position > $given_end_position ) {
-                                    // NO OVERLAP?
-                                    $new_start_position = $given_end_position;
-                                    $this->setStartPosition($new_start_position);
+                                    // POSITIVE CHARACTER POSITION / NOT OVERLOADED / NO OVERLAP
+                                    $this->setStartPosition($given_end_position);
                                     $length_position = $calculated_start_position - $given_end_position;
                                 } elseif($calculated_start_position < $given_end_position) {
+                                    // POSITIVE CHARACTER POSITION / NOT OVERLOADED / OVERLAPPED
                                     $length_position = $given_end_position - $calculated_start_position;
                                 } else {
-                                    // START and END are equal?
+                                    // POSITIVE CHARACTER POSITION / NOT OVERLOADED / EVEN
                                     $length_position = 0;
                                 }
-                            } elseif( $calculated_start_position < 0 ) {
-                                // POSITIVE END / NOT OVERLOADED / START < 0
-
-                            } else {
-                                $length_position = $given_end_position;
                             }
                             break;
                         default:
-                            // $overload is zero
+                            /// POSITIVE CHARACTER POSITION / OVERLOADED ONE
                             $length_position = $string_length;
                             break;
                     }
                     break;
                 case ($given_end_position < 0 ):
-                    // NEGATIVE END POSITION
+                    // NEGATIVE CHARACTER POSITION
                     $this->setStartPosition(0);
                     $overload_meter = ( abs($given_end_position) / $string_length );
                     switch( true ) {
                         case ($overload_meter > 1):
-                            // NEGATIVE END / OVERLOADED
-                            //@TODO Check for overlap?
+                            // NEGATIVE CHARACTER POSITION / OVERLOADED
                             if( $calculated_start_position == 0 ) {
                                 $length_position = $string_length - ( abs($given_end_position) % $string_length);
                             } else {
@@ -380,36 +354,32 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
                             }
                             break;
                         case ($overload_meter < 1):
-                            // NEGATIVE END / NOT OVERLOADED
+                            // NEGATIVE CHARACTER POSITION / NOT OVERLOADED
                             if ($calculated_start_position > ($string_length - abs($given_end_position))) {
-                                // NEGATIVE END / NOT OVERLOADED / OVERLAP
-                                $tmp = true; //@TODO remove me
+                                // NEGATIVE CHARACTER POSITION / NOT OVERLOADED / OVERLAP
+                                $new_start_position = $string_length - abs($given_end_position);
+                                $this->setStartPosition($new_start_position);
+
+                                $length_position = $calculated_start_position - $new_start_position;
                             } else {
-                                // NEGATIVE END / NOT OVERLOADED / NO OVERLAP
+                                // NEGATIVE CHARACTER POSITION / NOT OVERLOADED / NO OVERLAP
                                 if( $calculated_start_position == 0 ) {
                                     $length_position = $string_length - abs($given_end_position);
                                 } else {
-                                    // WE have a non-zero start position
-                                    if(($string_length - abs($given_end_position)) < $calculated_start_position) {
-                                        $new_start_position = $string_length - abs($given_end_position);
-                                        $this->setStartPosition($new_start_position);
-                                        $length_position = $given_start_position - abs($new_start_position);
-                                    } else {
-                                        $this->setStartPosition($calculated_start_position);
-                                        $subtract_this_from_string_length = abs($given_end_position) + $calculated_start_position;
-                                        $length_position = $string_length - $subtract_this_from_string_length;
-                                    }
+                                    $this->setStartPosition($calculated_start_position);
+                                    $subtract_from_string_length = abs($given_end_position) + $calculated_start_position;
+                                    $length_position = $string_length - $subtract_from_string_length;
                                 }
                             }
-
                             break;
                         default:
-                            // $overload is zero
+                            // / NEGATIVE CHARACTER POSITION / OVERLOADED ONE
                             $length_position = $given_start_position;
                             break;
                     }
                     break;
                 default:
+                    // ZERO CHARACTER POSITION
                     $this->setStartPosition(0);
                     $length_position = $given_start_position;
                     break;
@@ -714,6 +684,11 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
     public function forLength(int $length): ActiveStringInterface
     {
         return $this->forThisManyCharacters($length);
+    }
+    public function for(int $length): ActiveStringInterface
+    {
+        return $this->forThisManyCharacters($length);
+
     }
 
     public function toThisCharacterPosition(int $end): ActiveStringInterface

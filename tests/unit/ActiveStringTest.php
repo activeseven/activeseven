@@ -15,6 +15,7 @@ class ActiveStringTest extends TestCase
      * @var string
      */
     protected const FUNCTION_TO_UPPER = 'toUppercase';
+    protected const FUNCTION_TO_LOWER = 'toLowercase';
 
     // Position Test templates
     public function template_given_function_with_from(
@@ -383,7 +384,7 @@ class ActiveStringTest extends TestCase
 
     public function test_activestring_returns_uppercase_with_length() {
         $expected_result    = 'IAMTHEVERYMODELOFAMODERNMajorgeneraliveinformation';
-        $received_result    = $this->template_given_function_with_to(
+        $received_result    = $this->template_given_function_with_length(
             ActiveStringTest::FUNCTION_TO_UPPER,
             ActiveStringTest::TEST_STRING,
             25
@@ -393,7 +394,7 @@ class ActiveStringTest extends TestCase
     public function test_activestring_returns_uppercase_with_length_min_value()
     {
         $expected_result    = 'iamtheverymodelofamodernmajorgeneraliveinformation';
-        $received_result    = $this->template_given_function_with_to(
+        $received_result    = $this->template_given_function_with_length(
             ActiveStringTest::FUNCTION_TO_UPPER,
             ActiveStringTest::TEST_STRING,
             0
@@ -403,7 +404,7 @@ class ActiveStringTest extends TestCase
     public function test_activestring_returns_uppercase_with_length_max_value()
     {
         $expected_result    = 'IAMTHEVERYMODELOFAMODERNMAJORGENERALIVEINFORMATION';
-        $received_result    = $this->template_given_function_with_to(
+        $received_result    = $this->template_given_function_with_length(
             ActiveStringTest::FUNCTION_TO_UPPER,
             ActiveStringTest::TEST_STRING,
             50
@@ -412,8 +413,8 @@ class ActiveStringTest extends TestCase
     }
     public function test_activestring_returns_uppercase_with_length_overloaded()
     {
-        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMajorgeneraliveinformation';
-        $received_result    = $this->template_given_function_with_to(
+        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMAJORGENERALIVEINFORMATION';
+        $received_result    = $this->template_given_function_with_length(
             ActiveStringTest::FUNCTION_TO_UPPER,
             ActiveStringTest::TEST_STRING,
             75
@@ -422,18 +423,18 @@ class ActiveStringTest extends TestCase
     }
 
     public function test_activestring_returns_uppercase_with_negative_length() {
-        $expected_result    = 'IAMTHEVERYMODELOFAMODERNMajorgeneraliveinformation';
-        $received_result    = $this->template_given_function_with_to(
+        $expected_result    = 'IAMTHEVERYMODELOFAmodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_length(
             ActiveStringTest::FUNCTION_TO_UPPER,
             ActiveStringTest::TEST_STRING,
-            -25
+            -32
         );
         $this->assertEquals($expected_result,$received_result);
     }
     public function test_activestring_returns_uppercase_with_negative_length_min_value()
     {
         $expected_result    = 'IAMTHEVERYMODELOFAMODERNMAJORGENERALIVEINFORMATIOn';
-        $received_result    = $this->template_given_function_with_to(
+        $received_result    = $this->template_given_function_with_length(
             ActiveStringTest::FUNCTION_TO_UPPER,
             ActiveStringTest::TEST_STRING,
             -1
@@ -443,7 +444,7 @@ class ActiveStringTest extends TestCase
     public function test_activestring_returns_uppercase_with_negative_length_max_value()
     {
         $expected_result    = 'iamtheverymodelofamodernmajorgeneraliveinformation';
-        $received_result    = $this->template_given_function_with_to(
+        $received_result    = $this->template_given_function_with_length(
             ActiveStringTest::FUNCTION_TO_UPPER,
             ActiveStringTest::TEST_STRING,
             -50
@@ -453,7 +454,7 @@ class ActiveStringTest extends TestCase
     public function test_activestring_returns_uppercase_with_negative_length_overloaded()
     {
         $expected_result    = 'IAMTHEVERYMODELOFAMODERNMajorgeneraliveinformation';
-        $received_result    = $this->template_given_function_with_to(
+        $received_result    = $this->template_given_function_with_length(
             ActiveStringTest::FUNCTION_TO_UPPER,
             ActiveStringTest::TEST_STRING,
             -75
@@ -507,7 +508,7 @@ class ActiveStringTest extends TestCase
         $received_result    = $this->template_given_function_with_from_and_length(
             ActiveStringTest::FUNCTION_TO_UPPER,
             ActiveStringTest::TEST_STRING,
-            20,99
+            20,31
         );
         $this->assertEquals($expected_result,$received_result);
     }
@@ -671,6 +672,26 @@ class ActiveStringTest extends TestCase
             ActiveStringTest::FUNCTION_TO_UPPER,
             ActiveStringTest::TEST_STRING,
             -25,-99
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_negative_length_overlap()
+    {
+        $expected_result    = 'iamtheverymodeLOFAMODERNMAJORGENERALIVEINFOrmation';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -7,-29
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_returns_uppercase_with_negative_from_and_negative_length_no_overlap()
+    {
+        $expected_result    = 'IAMTHEVerymodelofamodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_from_and_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -43,-8
         );
         $this->assertEquals($expected_result,$received_result);
     }
@@ -931,6 +952,23 @@ class ActiveStringTest extends TestCase
         $this->assertEquals($expected_result,$received_result);
     }
 
+    public function sandbox() {
+        $expected_result    = 'IAMTHEVERYMODELOFAmodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -32
+        );
+        $this->assertEquals($expected_result,$received_result);
+
+        $expected_result    = 'IAMTHEVERYMODELOFAmodernmajorgeneraliveinformation';
+        $received_result    = $this->template_given_function_with_length(
+            ActiveStringTest::FUNCTION_TO_UPPER,
+            ActiveStringTest::TEST_STRING,
+            -75
+        );
+        $this->assertEquals($expected_result,$received_result);
+    }
 //
 //    public function test_activestring_can_urlencode_string()
 //    {
