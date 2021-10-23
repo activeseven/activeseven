@@ -9,6 +9,8 @@ use activeseven\constants\ActiveStringConstants;
 /**
  * Class ActiveString
  *
+ * @TODO write the class documentation.
+ *
  * Basic Usage
  * $string = new ActiveString('A really cool string!');
  * echo $string;                                                                // 'A really cool string!'
@@ -30,17 +32,45 @@ use activeseven\constants\ActiveStringConstants;
  */
 class ActiveString implements ActiveStringInterface, ActiveStringConstants
 {
-
+    /**
+     * Array of 'string states' for this object.
+     * Every time you make a change to the string the old
+     * state is held in this array. This allows changes to
+     * either be undone, or allows access to older versions
+     * of this string.
+     * @var array
+     */
     protected $strings = [];
 
+    /**
+     * Serves as a pointer to the current string version.
+     * @var int
+     */
+    protected $current_string_index = 0;
+
+    /**
+     * Stores the code for the current string operation being performed.
+     * @var string
+     */
     protected $current_operation = '';
 
+    /**
+     * The default start position for all operations.
+     * @var int
+     */
     protected $start_position = 0;
 
+    /**
+     * The end position for the current operation.
+     * @var null
+     */
     protected $end_position = null;
 
+    /**
+     * The length position for the current operation.
+     * @var null
+     */
     protected $length_position = null;
-
 
     /**
      * Holds the text we will search for in replace/with operations.
@@ -49,11 +79,17 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
      */
     protected $string_to_search_for = null;
 
+    /**
+     * Holds the text we will replace characters that we search for with.
+     * @var string
+     */
     protected $string_to_replace_with = '';
 
+    /**
+     * Toggles whether the search operations are case-sensitive.
+     * @var bool
+     */
     protected $case_sensitive = true;
-
-    protected $current_string_index = 0;
 
     /**
      * ActiveString constructor.
@@ -65,113 +101,10 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
     }
 
     /**
-     * Manages importing a NEW string to this object.
-     * This method will set the string for this class to
-     * the given value.
-     *
-     * NOTE: This method will trim all incoming strings
+     * Calculates the proper start position for the current operation.
      * @access  protected
-     * @param   string $string
-     */
-    protected function importString(string $string = '')
-    {
-        $this->strings = [$string];
-    }
-
-    /**
-     * Updates the strings state
-     * @param string $string
-     * @return string
-     */
-    protected function updateStringState(string $string): string
-    {
-        array_push($this->strings, $string);
-        return $this->__toString();
-    }
-
-    /**
-     * Resets all this shit.
-     */
-    protected function resetAll(): void
-    {
-        $this->resetStartPosition();
-        $this->resetEndPosition();
-        $this->resetCurrentOperation();
-        $this->resetStringToSearchFor();
-        $this->resetStringToReplaceWith();
-        $this->resetLengthPosition();
-    }
-
-    /**
-     * Undoes the last operation
-     * @return $this|ActiveStringInterface
-     */
-    public function undo(): ActiveStringInterface
-    {
-        if( !$this->hasCurrentOperation() ) {
-            $this->setCurrentOperation(ActiveStringConstants::UNDO);
-        }
-        if ($this->getSizeOfStringHistory() > 1) {
-            array_pop($this->strings);
-        }
-        return $this;
-    }
-
-    /**
-     * Returns the length of the current string
-     * @access  public
      * @return  int
      */
-    public function length(): int
-    {
-        return strlen($this->__toString());
-    }
-
-    public function getSizeOfStringHistory(): int
-    {
-        return count($this->strings);
-    }
-
-    protected function resetCurrentOperation(): void
-    {
-        $this->current_operation = '';
-    }
-
-    protected function hasCurrentOperation(): bool
-    {
-        return (!empty($this->current_operation));
-    }
-
-    protected function setCurrentOperation(string $operation): void
-    {
-        $this->current_operation = $operation;
-    }
-
-    protected function getCurrentOperation(): string
-    {
-        return $this->current_operation;
-    }
-
-    protected function resetStartPosition()
-    {
-        $this->start_position = 0;
-    }
-
-    protected function hasStartPosition()
-    {
-        return ($this->start_position !== 0);
-    }
-
-    protected function getStartPosition(): int
-    {
-        return $this->start_position;
-    }
-
-    protected function setStartPosition(int $start_from)
-    {
-        $this->start_position = $start_from;
-    }
-
     protected function calculateStartPosition():  int
     {
         $start_position = $this->getStartPosition();
@@ -189,62 +122,34 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
         return $start_position;
     }
 
-    protected function resetEndPosition()
+    /**
+     * Calculates the correct end position;
+     * @access  protected
+     * @return  int
+     */
+    protected function calculateEndPosition(): int
     {
-        $this->end_position = null;
+        // @TODO wtf is going on here? This method isn't used at all
+        // and there is a condition for the return.
+        $end_position   = $this->getEndPosition();
+        $length         = $this->length();
+
+        if( ($end_position <= $length) && ($end_position >= 0) ) {
+            return $end_position;
+        }
     }
 
-    protected function hasEndPosition()
-    {
-        return (!is_null($this->end_position));
-    }
-
-    protected function getEndPosition()
-    {
-        return $this->end_position;
-    }
-
-    protected function setEndPosition(int $end)
-    {
-        // The end_position can be
-        $this->end_position = $end;
-    }
-
-    protected function resetLengthPosition(): void
-    {
-        $this->length_position = null;
-    }
-
-    protected function hasLengthPosition(): bool
-    {
-        return (!is_null($this->length_position));
-    }
-
-    protected function getLengthPosition(): int
-    {
-        return $this->length_position;
-    }
-
-    protected function setLengthPosition(int $length): void
-    {
-        $this->length_position = $length;
-    }
-
-    protected function hasLengthOrEndPosition(): bool
-    {
-        return ($this->hasLengthPosition() || $this->hasEndPosition());
-    }
-
-    protected function hasNoLengthOrEndPosition(): bool
-    {
-        return (!$this->hasLengthPosition() || !$this->hasEndPosition());
-    }
-
+    /**
+     * Calculates the correct length position for the current operation
+     * @access  protected
+     * @return  int
+     */
     protected function calculateLengthPosition(): int
     {
         $string_length                  = $this->length();
         $calculated_start_position      = $this->calculateStartPosition();
         $given_start_position           = $this->getStartPosition();
+        $length_position                = 0;
 
         // First we change to see if the user sent us a LENGTH or if the users specified and END position.
         // In the event that we have both LENGTH and END then LENGTH takes priority.
@@ -389,28 +294,293 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
         return $length_position;
     }
 
-    protected function calculateEndPosition(): int
+    /**
+     * Manages importing a NEW string to this object.
+     * This method will set the string for this class to
+     * the given value.
+     *
+     * @access  protected
+     * @param   string $string
+     */
+    protected function importString(string $string = '')
     {
-        // The user gave us an 'end' position.
-        // Problem is that I need 'length'
-        // I really just need to deal with negative numbers here.
-        $end_position   = $this->getEndPosition();
-        $length         = $this->length();
-
-        if( ($end_position <= $length) && ($end_position >= 0) ) {
-            return $end_position;
-        }
-
+        $this->strings = [$string];
     }
 
+    /**
+     * Updates the strings state to the given string.
+     * @TODO Should this increment the index value?
+     * @param   string $string
+     * @return  string
+     */
+    protected function updateStringState(string $string): string
+    {
+        array_push($this->strings, $string);
+        return $this->__toString();
+    }
 
-    // Search for
+    /**
+     * Resets the state of this class for the next operation.
+     * @access  protected
+     * @uses    \activeseven\ActiveString::resetStartPosition()
+     * @uses    \activeseven\ActiveString::resetEndPosition()
+     * @uses    \activeseven\ActiveString::resetCurrentOperation()
+     * @uses    \activeseven\ActiveString::resetStringToSearchFor()
+     * @uses    \activeseven\ActiveString::resetStringToReplaceWith()
+     * @uses    \activeseven\ActiveString::resetLengthPosition()
+     * @used-by \activeseven\ActiveString::get()
+     * @return  void
+     */
+    protected function resetAll(): void
+    {
+        $this->resetStartPosition();
+        $this->resetEndPosition();
+        $this->resetCurrentOperation();
+        $this->resetStringToSearchFor();
+        $this->resetStringToReplaceWith();
+        $this->resetLengthPosition();
+    }
 
-    protected function resetStringToSearchFor()
+    /**
+     * Undoes the last string operation.
+     * @access  public
+     * @return  ActiveStringInterface
+     */
+    public function undo(): ActiveStringInterface
+    {
+        if( !$this->hasCurrentOperation() ) {
+            $this->setCurrentOperation(ActiveStringConstants::UNDO);
+        }
+        if ($this->getSizeOfStringHistory() > 1) {
+            array_pop($this->strings);
+        }
+        return $this;
+    }
+
+    /**
+     * Returns the length of the current string.
+     * @access  public
+     * @uses    \activeseven\ActiveString::__toString()
+     * @return  int
+     */
+    public function length(): int
+    {
+        return strlen($this->__toString());
+    }
+
+    /**
+     * Returns the size of the string history.
+     * @access  public
+     * @return  int
+     */
+    public function getSizeOfStringHistory(): int
+    {
+        return count($this->strings);
+    }
+
+    /**
+     * Resets the current operation.
+     * @access  public
+     * @return  void
+     */
+    protected function resetCurrentOperation(): void
+    {
+        $this->current_operation = '';
+    }
+
+    /**
+     * Returns boolean if there is a current operation.
+     * @access  protected
+     * @return  bool
+     */
+    protected function hasCurrentOperation(): bool
+    {
+        return (!empty($this->current_operation));
+    }
+
+    /**
+     * Sets the current operation to the given operation value.
+     * @access  protected
+     * @param   string $operation
+     * @return  void
+     */
+    protected function setCurrentOperation(string $operation): void
+    {
+        $this->current_operation = $operation;
+    }
+
+    /**
+     * Returns the currently set operation.
+     * NOTE: This method will return an empty string if no
+     * operation is set. This is because an empty string is
+     * the default state for the current_operation property.
+     * @access  protected
+     * @used-by ActiveString::get()
+     * @return  string
+     */
+    protected function getCurrentOperation(): string
+    {
+        return $this->current_operation;
+    }
+
+    /**
+     * Resets the start position.
+     * @access protected
+     * @return void
+     */
+    protected function resetStartPosition(): void
+    {
+        $this->start_position = 0;
+    }
+
+    /**
+     * Returns boolean if the start position is set.
+     * @access  protected
+     * @return  bool
+     */
+    protected function hasStartPosition(): bool
+    {
+        return ($this->start_position !== 0);
+    }
+
+    /**
+     * Returns the current start position.
+     * @access  protected
+     * @return  int
+     */
+    protected function getStartPosition(): int
+    {
+        return $this->start_position;
+    }
+
+    /**
+     * Sets the start position to the given value.
+     * @access  protected
+     * @param   int $start_from
+     * @return  void
+     */
+    protected function setStartPosition(int $start_from): void
+    {
+        $this->start_position = $start_from;
+    }
+
+    /**
+     * Resets the current end position.
+     * @access  protected
+     * @return  void
+     */
+    protected function resetEndPosition(): void
+    {
+        $this->end_position = null;
+    }
+
+    /**
+     * Returns boolean if an end position is set.
+     * @access  protected
+     * @return  bool
+     */
+    protected function hasEndPosition(): bool
+    {
+        return (!is_null($this->end_position));
+    }
+
+    /**
+     * Returns the currently set end position.
+     * @access  protected
+     * @return  null
+     */
+    protected function getEndPosition()
+    {
+        return $this->end_position;
+    }
+
+    /**
+     * Sets the end position to the given value.
+     * @access  protected
+     * @param   int $end
+     * @return  void
+     */
+    protected function setEndPosition(int $end): void
+    {
+        $this->end_position = $end;
+    }
+
+    /**
+     * Resets the length position.
+     * @access  protected
+     * @return  void
+     */
+    protected function resetLengthPosition(): void
+    {
+        $this->length_position = null;
+    }
+
+    /**
+     * Returns boolean if the length position is set.
+     * @access  protected
+     * @return  bool
+     */
+    protected function hasLengthPosition(): bool
+    {
+        return (!is_null($this->length_position));
+    }
+
+    /**
+     * Returns the currently set length position.
+     * NOTE: This method may return null if length
+     * was never set, as null is the default state.
+     * @return int
+     */
+    protected function getLengthPosition(): ?int
+    {
+        return $this->length_position;
+    }
+
+    /**
+     * Sets the length position to the given value.
+     * @access  protected
+     * @param   int $length
+     */
+    protected function setLengthPosition(int $length): void
+    {
+        $this->length_position = $length;
+    }
+
+    /**
+     * Returns boolean if there is a length OR end position set.
+     * @access  protected
+     * @return  bool
+     */
+    protected function hasLengthOrEndPosition(): bool
+    {
+        return ($this->hasLengthPosition() || $this->hasEndPosition());
+    }
+
+    /**
+     * Returns boolean if there is NO length or end position set.
+     * @access  protected
+     * @return  bool
+     */
+    protected function hasNoLengthOrEndPosition(): bool
+    {
+        return (!$this->hasLengthPosition() || !$this->hasEndPosition());
+    }
+
+    /**
+     * Resets the string to search for.
+     * @access  protected
+     * @return  void
+     */
+    protected function resetStringToSearchFor(): void
     {
         $this->string_to_search_for = null;
     }
 
+    /**
+     * Returns boolean if there is a string set to search for.
+     * @access  protected
+     * @return  bool
+     */
     protected function hasStringToSearchFor(): bool
     {
         return (!is_null($this->string_to_search_for));

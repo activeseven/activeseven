@@ -953,21 +953,7 @@ class ActiveStringTest extends TestCase
     }
 
     public function sandbox() {
-        $expected_result    = 'IAMTHEVERYMODELOFAmodernmajorgeneraliveinformation';
-        $received_result    = $this->template_given_function_with_length(
-            ActiveStringTest::FUNCTION_TO_UPPER,
-            ActiveStringTest::TEST_STRING,
-            -32
-        );
-        $this->assertEquals($expected_result,$received_result);
-
-        $expected_result    = 'IAMTHEVERYMODELOFAmodernmajorgeneraliveinformation';
-        $received_result    = $this->template_given_function_with_length(
-            ActiveStringTest::FUNCTION_TO_UPPER,
-            ActiveStringTest::TEST_STRING,
-            -75
-        );
-        $this->assertEquals($expected_result,$received_result);
+        $active_string ='';
     }
 //
 //    public function test_activestring_can_urlencode_string()
