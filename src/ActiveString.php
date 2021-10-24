@@ -93,7 +93,8 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
 
     /**
      * ActiveString constructor.
-     * @param string $string
+     * @access  public
+     * @param   string $string
      */
     public function __construct(string $string = '')
     {
@@ -586,13 +587,25 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
         return (!is_null($this->string_to_search_for));
     }
 
+    /**
+     * Returns the currently set search string.
+     * @access  protected
+     * @return  array|string|null
+     */
     protected function getStringToSearchFor()
     {
         return $this->string_to_search_for;
     }
 
+    /**
+     * Sets the string to search for to the given string.
+     * @access  protected
+     * @param   $string_to_search_for
+     * @return  bool
+     */
     protected function setStringToSearchFor($string_to_search_for): bool
     {
+        // @TODO consider putting all strings into an array instead of string|array.
         if (is_string($string_to_search_for) || is_array($string_to_search_for)) {
             $this->string_to_search_for = $string_to_search_for;
             return true;
@@ -600,23 +613,43 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
         return false;
     }
 
-
-    // REPLACE WITH
+    /**
+     * Resets the replace string to it's default value.
+     * @access  protected
+     * @return  void
+     */
     protected function resetStringToReplaceWith(): void
     {
         $this->string_to_replace_with = '';
     }
 
+    /**
+     * Returns boolean if the replace string has been set.
+     * @access  protected
+     * @return  bool
+     */
     protected function hasStringToReplaceWith(): bool
     {
         return (!empty($this->string_to_replace_with));
     }
 
+    /**
+     * Returns the currently set replace string.
+     * NOTE: This method will return an empty string if no
+     * replace string has been set.
+     * @return string
+     */
     protected function getStringToReplaceWith()
     {
         return $this->string_to_replace_with;
     }
 
+    /**
+     * Sets the replace string to the given value.
+     * @access  protected
+     * @param   $string_or_array_to_replace_with
+     * @return  bool
+     */
     protected function setStringToReplaceWith($string_or_array_to_replace_with): bool
     {
         if (is_string($string_or_array_to_replace_with) || is_array($string_or_array_to_replace_with)) {
@@ -626,68 +659,122 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
         return false;
     }
 
-
-
-    // CASE SENSITIVE
-
+    /**
+     * Returns boolean if search operations are case-sensitive or not.
+     * @access  public
+     * @return  bool
+     */
     public function isCaseSensitive(): bool
     {
         return $this->case_sensitive;
     }
 
+    /**
+     * Sets case sensitivity to the given value.
+     * Given value must be boolean.
+     * @access  public
+     * @param   bool $bool
+     * @return  ActiveStringInterface
+     */
     public function setCaseSensitive(bool $bool): ActiveStringInterface
     {
         $this->case_sensitive = $bool;
         return $this;
     }
 
+    /**
+     * Sets case sensitivity to true
+     * @access  public
+     * @return  ActiveStringInterface
+     */
     public function caseSensitive(): ActiveStringInterface
     {
         return $this->setCaseSensitive(true);
     }
 
+    /**
+     * Sets case sensitivity to false
+     * @access  public
+     * @return  ActiveStringInterface
+     */
     public function caseInsensitive(): ActiveStringInterface
     {
         return $this->setCaseSensitive(false);
     }
 
-
-
-
-
+    /**
+     * Sets the string index to the given value.
+     * @access  protected
+     * @param   int $index_value
+     */
     protected function setStringIndexTo(int $index_value)
     {
         $this->current_string_index = $index_value;
     }
 
+    /**
+     * Will increment the string index by the given value.
+     * @access  protected
+     * @param   int $increment_by
+     */
     protected function incrementStringIndex(int $increment_by = 1)
     {
         $this->current_string_index += $increment_by;
     }
 
-    protected function decrementStringIndex(int $decrement_by = 1)
+    /**
+     * Will decrement the string index by the given value.
+     * @access  protected
+     * @param   int $decrement_by
+     * @return  void
+     */
+    protected function decrementStringIndex(int $decrement_by = 1): void
     {
         $this->current_string_index -= $decrement_by;
     }
 
+    /**
+     * Updates the string state with a decoded version of the string.
+     * @access  public
+     * @uses    \activeseven\ActiveString::decodeUrl()
+     * @return  ActiveStringInterface
+     */
     public function decodeUrl(): ActiveStringInterface
     {
         $this->updateStringState(urldecode($this->get()));
         return $this;
     }
 
+    /**
+     * Updates teh string state with an encoded version of the string.
+     * @access  public
+     * @uses    \activeseven\ActiveString::updateStringState()
+     * @return  ActiveStringInterface
+     */
     public function encodeUrl(): ActiveStringInterface
     {
         $this->updateStringState(urlencode($this->get()));
         return $this;
     }
 
+    /**
+     * Sets the current operation to uppercase.
+     * @access  public
+     * @uses    \activeseven\ActiveString::setCurrentOperation()
+     * @return  ActiveStringInterface
+     */
     public function toUppercase(): ActiveStringInterface
     {
         $this->setCurrentOperation(ActiveStringConstants::UPPERCASE);
         return $this;
     }
 
+    /**
+     * Sets the current operation to lowercase.
+     * @access  public
+     * @uses    \activeseven\ActiveString::setCurrentOperation()
+     * @return  ActiveStringInterface
+     */
     public function toLowercase(): ActiveStringInterface
     {
         $this->setCurrentOperation(ActiveStringConstants::LOWERCASE);
@@ -695,6 +782,8 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
     }
 
     /**
+     * Filters the string by the given parameters.
+     * @access  protected
      * @param   int|null $flag
      * @param   null $options
      * @param   bool $chain         Defaults to TRUE, will return an instance of ActiveString.
@@ -711,53 +800,103 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
         return $this;
     }
 
+    /**
+     * Returns boolean if the current string is considered to be a URL.
+     * @access  public
+     * @return  bool
+     */
     public function isUrl(): bool
     {
         return $this->filterString(FILTER_VALIDATE_URL, null, false);
     }
 
+    /**
+     * Returns boolean if the current string is an email address.
+     * @access  public
+     * @return  bool
+     */
     public function isEmail(): bool
     {
         return $this->filterString(FILTER_VALIDATE_EMAIL,null, false);
     }
 
+    /**
+     * Returns boolean if the current string is an IP address.
+     * @access  public
+     * @return  bool
+     */
     public function isIp(): bool
     {
         return $this->filterString(FILTER_VALIDATE_IP, null, false);
     }
 
+    /**
+     * Returns boolean if the current string is a valid ipv6 address.
+     * @access  public
+     * @return  bool
+     */
     public function isIpv6(): bool
     {
         return $this->filterString(FILTER_VALIDATE_IP, FILTER_FLAG_IPV6, false);
     }
 
+    /**
+     * Returns boolean if the current string is an valid ipv4 address.
+     * @access  public
+     * @return  bool
+     */
     public function isIpv4(): bool
     {
         return $this->filterString(FILTER_VALIDATE_IP, FILTER_FLAG_IPV4, false);
     }
 
+    /**
+     * Returns boolean if the current string is a valid domain.
+     * @access  public
+     * @return  bool
+     */
     public function isDomain(): bool
     {
         return $this->filterString(FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME, false);
     }
 
+    /**
+     * Returns boolean if the current string is a valid mac address.
+     * @access  public
+     * @return  bool
+     */
     public function isMac(): bool
     {
         return $this->filterString(FILTER_VALIDATE_MAC, null, false);
     }
 
+    /**
+     * Will sanitize the current string as an email address.
+     * @access  public
+     * @return  ActiveStringInterface
+     */
     public function sanitizeEmail(): ActiveStringInterface
     {
         $this->filterString(FILTER_SANITIZE_EMAIL);
         return $this;
     }
 
+    /**
+     * Strips characters with an ASCII value less than 32
+     * @access  public
+     * @return  ActiveStringInterface
+     */
     public function stripLow(): ActiveStringInterface
     {
         $this->filterString(FILTER_SANITIZE_ENCODED, FILTER_FLAG_STRIP_LOW);
         return $this;
     }
 
+    /**
+     * Strips characters with an ASCII value greater than 127
+     * @access  public
+     * @return  ActiveStringInterface
+     */
     public function stripHigh(): ActiveStringInterface
     {
         $this->filterString( FILTER_SANITIZE_ENCODED, FILTER_FLAG_STRIP_HIGH);
@@ -822,9 +961,20 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
         return $this;
     }
 
-    public function contains(string $string_to_find )
+    /**
+     * Returns boolean if the current string contains the given string.
+     * @access  public
+     * @param   string $string_to_find
+     * @return  bool
+     */
+    public function contains(string $string_to_find ): bool
     {
-        return (strpos($this->get(),$string_to_find) !== false);
+        if( $this->isCaseSensitive() ) {
+            $result = (strpos($this->get(),$string_to_find) !== false);
+        } else {
+            $result = (stripos($this->get(),$string_to_find) !== false);
+        }
+        return $result;
     }
 
 
@@ -926,8 +1076,6 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
      */
     public function get(bool $sticky_change = true): string
     {
-        // @TODO Refactor ActiveString:get()
-
         $string             = $this->__toString();
         $current_operation  = $this->getCurrentOperation();
         $string_length      = $this->length();
@@ -937,7 +1085,6 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
                             ? $this->calculateLengthPosition()
                             : null;
         $start_position     = $this->calculateStartPosition();
-
 
         switch ( $current_operation ) {
             case ActiveStringConstants::UPPERCASE:
@@ -1009,9 +1156,13 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
 
         }
 
+        // Reset everything and get ready for the next operation.
         $this->resetAll();
 
+        // We're always going to return the result of the current opertation, but....
         $return_me = $this->__toString();
+        // the user doesn't want the change to "stick" so just return the result but don't save
+        // the result to the string state.
         if( !$sticky_change ) {
             $this->undo();
         }
@@ -1019,6 +1170,11 @@ class ActiveString implements ActiveStringInterface, ActiveStringConstants
         return $return_me;
     }
 
+    /**
+     * Returns the latest version of the string.
+     * @access  public
+     * @return  string
+     */
     public function __toString(): string
     {
         return (string)$this->strings[array_key_last($this->strings)];

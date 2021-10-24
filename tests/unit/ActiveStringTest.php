@@ -214,6 +214,53 @@ class ActiveStringTest extends TestCase
         );
     }
 
+    // CONTAINS TESTS
+    public function test_activestring_contains_true(){
+        $active_string  = new \activeseven\ActiveString(ActiveStringTest::TEST_STRING);
+        $result         =  $active_string->contains('modernmajorgeneral');
+
+        $this->assertTrue( $result );
+    }
+    public function test_activestring_contains_false(){
+        $active_string  = new \activeseven\ActiveString(ActiveStringTest::TEST_STRING);
+        $result         =  $active_string->contains('jabberwocky');
+
+        $this->assertFalse( $result );
+    }
+    public function test_activestring_contains_case_sensitive(){
+        $active_string  = new \activeseven\ActiveString(ActiveStringTest::TEST_STRING);
+        $active_string->caseSensitive();
+        $result         =  $active_string->contains('modernMajorGeneral');
+
+        $this->assertFalse( $result );
+    }
+    public function test_activestring_contains_case_insensitive(){
+        $active_string  = new \activeseven\ActiveString(ActiveStringTest::TEST_STRING);
+        $active_string->caseInsensitive();
+        $result         =  $active_string->contains('MODERNMAJORGENERAL');
+
+        $this->assertTrue( $result );
+    }
+
+    // SEARCH/REPLACE TESTS
+    public function test_activestring_search_replace_case_sensitive(){
+        $active_string = new \activeseven\ActiveString(ActiveStringTest::TEST_STRING);
+        $active_string->caseSensitive();
+        $expected_result = str_replace('modern','ancient', ActiveStringTest::TEST_STRING);
+        $received_result = $active_string->replace('modern')->with('ancient')->get();
+
+        $this->assertEquals($expected_result,$received_result);
+    }
+    public function test_activestring_search_replace_case_insensitive(){
+        $active_string = new \activeseven\ActiveString(ActiveStringTest::TEST_STRING);
+        $active_string->caseInsensitive();
+        $expected_result = str_replace('Modern','Replace', ActiveStringTest::TEST_STRING);
+        $received_result = $active_string->replace('modern')->with('ancient')->get();
+
+        $this->assertEquals($expected_result,ActiveStringTest::TEST_STRING);
+    }
+
+
     // UPPERCASE TESTS
     public function test_activestring_returns_uppercase_with_from()
     {
